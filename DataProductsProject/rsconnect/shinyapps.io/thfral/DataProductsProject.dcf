@@ -1,0 +1,13 @@
+name: DataProductsProject
+title: DataProductsProject
+username:
+account: thfral
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 392733
+bundleId: 1510230
+url: https://thfral.shinyapps.io/DataProductsProject/
+when: 1533064752.23688
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: IrisCluster.html|IrisCluster.Rmd

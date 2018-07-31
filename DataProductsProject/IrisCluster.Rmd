@@ -1,0 +1,150 @@
+---
+title: "Iris Cluster Application"
+author: "Thiago Almeida"
+date: "31 de julho de 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+This is a documentation of the Iris Cluster application. The obective of this application is to show the diference of variables using the kmeans function, which perform k-means clustering on a data matrix.
+
+Example:
+
+`kmeans(x, centers)`
+
+## Dataset
+
+The dataset used in this appliction is a derivation of the iris default dataset.
+
+```{r iris}
+  head(iris)
+  
+```
+
+
+With a additional columns called SpeciesChar, as shown below.
+
+```{r load}
+  dataset <- iris
+  dataset$SpeciesChar <- ifelse(dataset$Species == 'setosa', 'S', ifelse(dataset$Species == 'versicolor', 'V', 'I'))
+  
+```
+
+## Interface
+
+The application has 3 inputs:
+
+* Cluster count: It is the number o cluster used in the kmeans function
+* Show Sepal Chart: It is the char Sepal.Width x Sepal.Lenght
+* Show Petal Chart: It is the char Petal.Width x Petal.Lenght
+
+## Sample Output 
+
+With cluster count iqual to 3
+
+```{r sample, echo = FALSE}
+  # Combine the Sepal variables into a new data frame
+  selectedData1 <- dataset[, c('Sepal.Length', 'Sepal.Width')]
+
+  # Combine the Petal variables into a new data frame
+  selectedData2 <- dataset[, c('Petal.Length', 'Petal.Width')]
+
+  # Execute the kmeans function with Sepal values
+  clusters1 <- kmeans(selectedData1, 3)
+  
+  # Execute the kmeans function with Petal values
+  clusters2 <- kmeans(selectedData2, 3)
+  
+  # Sepal Chart
+    plot(selectedData1,
+         col = clusters1$cluster,
+         pch = as.character(dataset$SpeciesChar), 
+         cex = 2)
+    points(clusters1$centers, pch = 4, cex = 4, lwd = 4)
+
+  
+  # Petal Chart
+    plot(selectedData2,
+         col = clusters2$cluster,
+         pch = as.character(dataset$SpeciesChar), 
+         cex = 2)
+    points(clusters2$centers, pch = 4, cex = 4, lwd = 4)
+  
+```
+
+## Codes
+
+### ui.R
+
+```{r ui, eval=FALSE}
+# Header
+  headerPanel('Iris k-means clustering'),
+  # Input panel
+  sidebarPanel(
+    numericInput('clusters', 'Cluster count', 3,
+                 min = 1, max = 9),
+    checkboxInput("sepal", "Show Sepal Chart", TRUE),
+    checkboxInput("petal", "Show Petal Chart", TRUE)
+  ),
+  # Chart panel
+  mainPanel(
+    conditionalPanel("input.sepal",
+                     plotOutput('plot1')
+    ),
+    conditionalPanel("input.petal",
+                     plotOutput('plot2')
+    )
+  )
+```
+
+### server.R
+
+```{r server, eval=FALSE}
+dataset <- iris
+  dataset$SpeciesChar <- ifelse(dataset$Species == 'setosa', 'S', ifelse(dataset$Species == 'versicolor', 'V', 'I'))
+  
+  # Combine the Sepal variables into a new data frame
+  selectedData1 <- reactive({
+    dataset[, c('Sepal.Length', 'Sepal.Width')]
+  })
+
+  # Combine the Petal variables into a new data frame
+  selectedData2 <- reactive({
+    dataset[, c('Petal.Length', 'Petal.Width')]
+  })
+  
+  # Execute the kmeans function with Sepal values
+  clusters1 <- reactive({
+    kmeans(selectedData1(), input$clusters)
+  })
+  
+  # Execute the kmeans function with Petal values
+  clusters2 <- reactive({
+    kmeans(selectedData2(), input$clusters)
+  })
+  
+  # Sepal Chart
+  output$plot1 <- renderPlot({
+    
+    plot(selectedData1(),
+         col = clusters1()$cluster,
+         pch = as.character(dataset$SpeciesChar), 
+         cex = 2)
+    points(clusters1()$centers, pch = 4, cex = 4, lwd = 4)
+  })
+  
+  # Petal Chart
+  output$plot2 <- renderPlot({
+    
+    plot(selectedData2(),
+         col = clusters2()$cluster,
+         pch = as.character(dataset$SpeciesChar), 
+         cex = 2)
+    points(clusters2()$centers, pch = 4, cex = 4, lwd = 4)
+  })
+```
